@@ -1,17 +1,14 @@
 name: Build Libraries
 
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+  release:
+    types: [created]
   workflow_dispatch:
     inputs:
-      force_rebuild:
-        description: 'Force rebuild all platforms'
-        required: false
-        default: 'false'
-        type: boolean
+      tag_name:
+        description: 'Tag name for the release (e.g., v1.0.0)'
+        required: true
+        type: string
 
 env:
   VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg_cache,readwrite"
@@ -23,14 +20,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          lfs: true
-          fetch-depth: 0
-
-      - name: Setup Git LFS
-        run: |
-          git lfs install
-          git lfs pull
 
       - name: Install system dependencies
         run: |
@@ -92,14 +81,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          lfs: true
-          fetch-depth: 0
-
-      - name: Setup Git LFS
-        run: |
-          git lfs install
-          git lfs pull
 
       - name: Install system dependencies
         run: |
@@ -170,14 +151,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          lfs: true
-          fetch-depth: 0
-
-      - name: Setup Git LFS
-        run: |
-          git lfs install
-          git lfs pull
 
       - name: Remove system LLVM (conflicts with MinGW)
         run: |
@@ -264,84 +237,71 @@ jobs:
           path: libs/windows/
           retention-days: 7
 
-  commit-artifacts:
-    name: Commit Built Libraries
+  upload-release-assets:
+    name: Upload Release Assets
     needs: [build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          lfs: true
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Git LFS
-        run: |
-          git lfs install
-
       - name: Download Linux artifacts
         uses: actions/download-artifact@v4
         with:
           name: libs-linux
-          path: libs/linux/
+          path: libs-linux/
 
       - name: Download macOS artifacts
         uses: actions/download-artifact@v4
         with:
           name: libs-macos
-          path: libs/macos/
+          path: libs-macos/
 
       - name: Download Windows artifacts
         uses: actions/download-artifact@v4
         with:
           name: libs-windows
-          path: libs/windows/
+          path: libs-windows/
 
       - name: Display structure
         run: |
           echo "=== Linux ==="
-          ls -la libs/linux/lib/*.a | wc -l
+          find libs-linux -name "*.a" | wc -l
           echo ""
           echo "=== macOS ==="
-          ls -la libs/macos/lib/*.a | wc -l
+          find libs-macos -name "*.a" | wc -l
           echo ""
           echo "=== Windows ==="
-          ls -la libs/windows/lib/*.a | wc -l
+          find libs-windows -name "*.a" | wc -l
 
-      - name: Configure Git
+      - name: Determine tag name
+        id: tag
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Track new LFS files
-        run: |
-          # Ensure .a files are tracked by LFS
-          git lfs track "libs/**/*.a"
-          git lfs track "libs/**/*.lib"
-          git add .gitattributes
-
-      - name: Commit and push
-        run: |
-          git add libs/
-
-          # Check if there are changes to commit
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
           else
-            git commit -m "Update pre-built libraries
-
-          Built from commit: ${{ github.sha }}
-          Workflow run: ${{ github.run_id }}
-
-          Platforms:
-          - Linux (x64-linux)
-          - macOS (x64-osx/arm64-osx)
-          - Windows (x64-mingw-static)"
-
-            git push
-            echo "Changes committed and pushed"
+            echo "tag=${{ inputs.tag_name }}" >> $GITHUB_OUTPUT
           fi
+
+      - name: Create archives
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+
+          # Create tar.gz for Linux
+          tar -czvf "sindarin-libs-${TAG}-linux.tar.gz" -C libs-linux .
+
+          # Create tar.gz for macOS
+          tar -czvf "sindarin-libs-${TAG}-macos.tar.gz" -C libs-macos .
+
+          # Create zip for Windows
+          cd libs-windows && zip -r "../sindarin-libs-${TAG}-windows.zip" . && cd ..
+
+          echo "Created archives:"
+          ls -la *.tar.gz *.zip
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          files: |
+            sindarin-libs-*.tar.gz
+            sindarin-libs-*.zip
