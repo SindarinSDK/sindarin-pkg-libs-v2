@@ -1,0 +1,32 @@
+# Build directories
+build/
+vcpkg/
+vcpkg_installed/
+vcpkg_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# Note: libs/ directory is NOT ignored - it contains the built artifacts
+# that are tracked by Git LFS
