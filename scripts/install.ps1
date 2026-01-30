@@ -1,10 +1,10 @@
 # Sindarin Package Libraries Installer for Windows
-# Downloads and extracts the latest sindarin-pkg-libs to ./libs
+# Downloads and extracts the latest sindarin-pkg-libs to ./libs/windows
 
 $ErrorActionPreference = "Stop"
 
 $REPO = "SindarinSDK/sindarin-pkg-libs-v2"
-$INSTALL_DIR = Join-Path (Get-Location) "libs"
+$INSTALL_DIR = Join-Path (Get-Location) "libs\windows"
 
 function Write-Status {
     param(

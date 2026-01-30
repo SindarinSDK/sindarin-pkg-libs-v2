@@ -1,11 +1,11 @@
 #!/bin/bash
 # Sindarin Package Libraries Installer for Linux/macOS
-# Downloads and extracts the latest sindarin-pkg-libs to ./libs
+# Downloads and extracts the latest sindarin-pkg-libs to ./libs/{os}
 
 set -e
 
 REPO="SindarinSDK/sindarin-pkg-libs-v2"
-INSTALL_DIR="$(pwd)/libs"
+BASE_DIR="$(pwd)/libs"
 
 # Colors for output
 RED='\033[0;31m'
@@ -181,6 +181,9 @@ main() {
     local os
     os=$(detect_os)
     write_status "Detected OS: ${os}"
+
+    # Set install directory based on OS
+    INSTALL_DIR="${BASE_DIR}/${os}"
 
     local release_info
     release_info=$(get_latest_release "$os")

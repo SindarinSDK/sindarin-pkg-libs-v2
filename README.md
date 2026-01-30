@@ -14,7 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/SindarinSDK/sindarin-pkg-libs-v2/ma
 irm https://raw.githubusercontent.com/SindarinSDK/sindarin-pkg-libs-v2/main/scripts/install.ps1 | iex
 ```
 
-These commands download and extract the latest libraries to `./libs` in your current directory.
+These commands download and extract the latest libraries to `./libs/{platform}` (e.g., `./libs/linux`, `./libs/macos`, `./libs/windows`).
 
 ## Supported Platforms
 
@@ -38,20 +38,38 @@ These commands download and extract the latest libraries to `./libs` in your cur
 
 ## Extracted Directory Structure
 
-After installation, the `libs` directory contains:
+After installation, the `libs` directory contains platform-specific subdirectories:
 
 ```
 libs/
-├── lib/          # Static libraries (.a files)
-├── include/      # Header files
-└── share/        # CMake config files
+├── linux/        # Linux libraries (when installed on Linux)
+│   ├── lib/
+│   ├── include/
+│   └── share/
+├── macos/        # macOS libraries (when installed on macOS)
+│   ├── lib/
+│   ├── include/
+│   └── share/
+└── windows/      # Windows libraries (when installed on Windows)
+    ├── lib/
+    ├── include/
+    └── share/
 ```
 
 ## Usage in CMake
 
 ```cmake
-# Set paths (adjust based on your project structure)
-set(SINDARIN_LIBS_DIR "${CMAKE_SOURCE_DIR}/libs")
+# Determine platform
+if(WIN32)
+    set(SINDARIN_LIBS_PLATFORM "windows")
+elseif(APPLE)
+    set(SINDARIN_LIBS_PLATFORM "macos")
+else()
+    set(SINDARIN_LIBS_PLATFORM "linux")
+endif()
+
+# Set paths
+set(SINDARIN_LIBS_DIR "${CMAKE_SOURCE_DIR}/libs/${SINDARIN_LIBS_PLATFORM}")
 set(SINDARIN_LIBS_INCLUDE "${SINDARIN_LIBS_DIR}/include")
 set(SINDARIN_LIBS_LIB "${SINDARIN_LIBS_DIR}/lib")
 
