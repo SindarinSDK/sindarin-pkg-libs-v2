@@ -1,4 +1,4 @@
-name: Build Libraries
+name: Release
 
 on:
   push:
