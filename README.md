@@ -14,7 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/SindarinSDK/sindarin-pkg-libs-v2/ma
 irm https://raw.githubusercontent.com/SindarinSDK/sindarin-pkg-libs-v2/main/scripts/install.ps1 | iex
 ```
 
-These commands download and extract the latest libraries to `./libs/{platform}` (e.g., `./libs/linux`, `./libs/macos`, `./libs/windows`).
+These commands download and extract the latest libraries to `./libs/{platform}` (e.g., `./libs/linux`, `./libs/darwin`, `./libs/windows`).
 
 ## Supported Platforms
 
@@ -46,7 +46,7 @@ libs/
 │   ├── lib/
 │   ├── include/
 │   └── share/
-├── macos/        # macOS libraries (when installed on macOS)
+├── darwin/       # Darwin/macOS libraries (when installed on macOS)
 │   ├── lib/
 │   ├── include/
 │   └── share/
@@ -63,7 +63,7 @@ libs/
 if(WIN32)
     set(SINDARIN_LIBS_PLATFORM "windows")
 elseif(APPLE)
-    set(SINDARIN_LIBS_PLATFORM "macos")
+    set(SINDARIN_LIBS_PLATFORM "darwin")
 else()
     set(SINDARIN_LIBS_PLATFORM "linux")
 endif()

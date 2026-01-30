@@ -15,10 +15,7 @@ from pathlib import Path
 
 def get_platform():
     """Get the current platform name."""
-    system = platform.system().lower()
-    if system == "darwin":
-        return "macos"
-    return system
+    return platform.system().lower()
 
 
 def get_triplet():

@@ -10,13 +10,13 @@ ifeq ($(OS),Windows_NT)
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Darwin)
-        PLATFORM := macos
+        PLATFORM := darwin
         UNAME_M := $(shell uname -m)
         ifeq ($(UNAME_M),arm64)
-            CMAKE_PRESET := ci-macos-arm64
+            CMAKE_PRESET := ci-darwin-arm64
             TRIPLET := arm64-osx
         else
-            CMAKE_PRESET := ci-macos
+            CMAKE_PRESET := ci-darwin
             TRIPLET := x64-osx
         endif
     else

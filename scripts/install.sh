@@ -46,7 +46,7 @@ detect_os() {
             echo "linux"
             ;;
         Darwin*)
-            echo "macos"
+            echo "darwin"
             ;;
         *)
             write_status "Unsupported operating system: $os" "error"
