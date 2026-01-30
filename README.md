@@ -2,6 +2,20 @@
 
 Pre-built static libraries for Sindarin projects. This repository provides cross-platform static libraries built with vcpkg, automatically compiled and committed via GitHub Actions.
 
+## Quick Install
+
+**Linux/macOS:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/SindarinSDK/sindarin-pkg-libs-v2/main/scripts/install.sh | bash
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/SindarinSDK/sindarin-pkg-libs-v2/main/scripts/install.ps1 | iex
+```
+
+These commands download and extract the latest libraries to `./libs` in your current directory.
+
 ## Overview
 
 This repository builds and maintains static libraries for:
@@ -129,30 +143,13 @@ The repository includes automated workflows that:
 
 1. Build libraries on all three platforms (Linux, macOS, Windows)
 2. Cache vcpkg installations for faster builds
-3. Automatically commit built libraries back to the repository
-4. Use Git LFS for storing binary files
+3. Create releases with platform-specific archives
 
 ### Triggering a Rebuild
 
 - Push to `main` or `master` branch
 - Create a pull request
 - Manually trigger via GitHub Actions UI with "Force rebuild" option
-
-## Git LFS
-
-This repository uses Git LFS to store binary library files. When cloning:
-
-```bash
-git lfs install
-git clone https://github.com/your-org/sindarin-libs.git
-```
-
-Or if already cloned:
-
-```bash
-git lfs install
-git lfs pull
-```
 
 ## Updating Dependencies
 
