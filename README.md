@@ -1,6 +1,6 @@
 # Sindarin Libs
 
-Pre-built static libraries for Sindarin projects. This repository provides cross-platform static libraries built with vcpkg, automatically compiled and committed via GitHub Actions.
+Pre-built static libraries for Sindarin projects. Libraries are built via GitHub Actions and distributed as release assets.
 
 ## Quick Install
 
@@ -16,12 +16,11 @@ irm https://raw.githubusercontent.com/SindarinSDK/sindarin-pkg-libs-v2/main/scri
 
 These commands download and extract the latest libraries to `./libs` in your current directory.
 
-## Overview
+## Supported Platforms
 
-This repository builds and maintains static libraries for:
-- **Linux** (x64-linux triplet)
-- **macOS** (x64-osx / arm64-osx triplets)
-- **Windows** (x64-mingw-static triplet)
+- **Linux** (x64-linux)
+- **macOS** (x64-osx / arm64-osx)
+- **Windows** (x64-mingw-static)
 
 ## Included Libraries
 
@@ -37,56 +36,22 @@ This repository builds and maintains static libraries for:
 | libgit2 | Git implementation |
 | curl | HTTP client library |
 
-## Directory Structure
+## Extracted Directory Structure
+
+After installation, the `libs` directory contains:
 
 ```
-sindarin-libs/
-├── libs/
-│   ├── linux/
-│   │   ├── lib/          # Static libraries (.a files)
-│   │   ├── include/      # Header files
-│   │   ├── share/        # CMake config files
-│   │   └── VERSION       # Build version
-│   ├── macos/
-│   │   ├── lib/
-│   │   ├── include/
-│   │   ├── share/
-│   │   └── VERSION
-│   └── windows/
-│       ├── lib/
-│       ├── include/
-│       ├── share/
-│       └── VERSION
-├── vcpkg.json            # Dependency manifest
-├── CMakeLists.txt        # Build configuration
-├── CMakePresets.json     # Build presets
-├── Makefile              # Build wrapper
-└── .github/workflows/    # CI/CD pipelines
+libs/
+├── lib/          # Static libraries (.a files)
+├── include/      # Header files
+└── share/        # CMake config files
 ```
 
-## Usage as a Submodule
-
-Add this repository as a submodule to your project:
-
-```bash
-git submodule add https://github.com/your-org/sindarin-libs.git libs/sindarin-libs
-git submodule update --init --recursive
-```
-
-Then in your CMakeLists.txt:
+## Usage in CMake
 
 ```cmake
-# Determine platform
-if(WIN32)
-    set(SINDARIN_LIBS_PLATFORM "windows")
-elseif(APPLE)
-    set(SINDARIN_LIBS_PLATFORM "macos")
-else()
-    set(SINDARIN_LIBS_PLATFORM "linux")
-endif()
-
-# Set paths
-set(SINDARIN_LIBS_DIR "${CMAKE_SOURCE_DIR}/libs/sindarin-libs/libs/${SINDARIN_LIBS_PLATFORM}")
+# Set paths (adjust based on your project structure)
+set(SINDARIN_LIBS_DIR "${CMAKE_SOURCE_DIR}/libs")
 set(SINDARIN_LIBS_INCLUDE "${SINDARIN_LIBS_DIR}/include")
 set(SINDARIN_LIBS_LIB "${SINDARIN_LIBS_DIR}/lib")
 
@@ -124,7 +89,7 @@ target_link_libraries(your_target
 # Setup vcpkg and install dependencies
 make setup
 
-# Build and copy libraries to libs/{platform}/
+# Build libraries to libs/{platform}/
 make build
 
 # Clean build artifacts
@@ -139,23 +104,20 @@ make info
 
 ## GitHub Actions
 
-The repository includes automated workflows that:
+The workflow builds libraries on all three platforms and uploads them as release assets.
 
-1. Build libraries on all three platforms (Linux, macOS, Windows)
-2. Cache vcpkg installations for faster builds
-3. Create releases with platform-specific archives
+### Creating a Release
 
-### Triggering a Rebuild
+1. Create a new release on GitHub with a version tag (e.g., `v1.0.0`)
+2. The workflow automatically builds all platforms and attaches the archives to the release
 
-- Push to `main` or `master` branch
-- Create a pull request
-- Manually trigger via GitHub Actions UI with "Force rebuild" option
+Alternatively, trigger manually via the Actions UI with a tag name.
 
 ## Updating Dependencies
 
 1. Edit `vcpkg.json` to add/modify dependencies
-2. Commit and push to trigger a rebuild
-3. GitHub Actions will build and commit the new libraries
+2. Create a new release to trigger builds
+3. Archives will be attached to the release
 
 ## License
 
