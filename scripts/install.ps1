@@ -54,10 +54,34 @@ function Install-SindarinLibs {
         [hashtable]$Release
     )
 
-    Write-Status "Downloading $($Release.Name)..."
+    # Check package cache first
+    $cacheDir = Join-Path $HOME ".sn-cache" "downloads"
+    $cachedZip = Join-Path $cacheDir $Release.Name
+
+    if (Test-Path $cachedZip) {
+        Write-Status "Using cached $($Release.Name)"
+    }
+    else {
+        Write-Status "Downloading $($Release.Name)..."
+
+        if (-not (Test-Path $cacheDir)) {
+            New-Item -ItemType Directory -Path $cacheDir | Out-Null
+        }
+
+        try {
+            Invoke-WebRequest -Uri $Release.Url -OutFile $cachedZip -UseBasicParsing
+        }
+        catch {
+            Write-Status "Download failed: $_" -Type "Error"
+            # Clean up partial download
+            if (Test-Path $cachedZip) {
+                Remove-Item -Force $cachedZip -ErrorAction SilentlyContinue
+            }
+            exit 1
+        }
+    }
 
     $tempDir = Join-Path $env:TEMP "sindarin-libs-install"
-    $zipPath = Join-Path $tempDir $Release.Name
 
     # Clean up any previous temp directory
     if (Test-Path $tempDir) {
@@ -66,9 +90,6 @@ function Install-SindarinLibs {
     New-Item -ItemType Directory -Path $tempDir | Out-Null
 
     try {
-        # Download the release
-        Invoke-WebRequest -Uri $Release.Url -OutFile $zipPath -UseBasicParsing
-
         Write-Status "Extracting to $INSTALL_DIR..."
 
         # Create or clean install directory
@@ -77,9 +98,9 @@ function Install-SindarinLibs {
         }
         New-Item -ItemType Directory -Path $INSTALL_DIR | Out-Null
 
-        # Extract the zip
+        # Extract the zip from cache
         $extractDir = Join-Path $tempDir "extracted"
-        Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
+        Expand-Archive -Path $cachedZip -DestinationPath $extractDir -Force
 
         # Handle potentially nested directory structure
         $contents = Get-ChildItem -Path $extractDir

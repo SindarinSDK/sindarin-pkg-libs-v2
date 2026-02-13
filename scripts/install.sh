@@ -129,17 +129,30 @@ install_sindarin_libs() {
     local version="${release_info%%|*}"
     local download_url="${release_info#*|}"
 
-    write_status "Downloading sindarin-libs ${version} for ${os}..."
+    # Derive filename from download URL
+    local archive_name
+    archive_name=$(basename "$download_url")
 
-    # Create temp directory
+    # Check package cache first
+    local cache_dir="${HOME}/.sn-cache/downloads"
+    local cached_archive="${cache_dir}/${archive_name}"
+
+    if [ -f "$cached_archive" ]; then
+        write_status "Using cached ${archive_name}"
+    else
+        write_status "Downloading sindarin-libs ${version} for ${os}..."
+        mkdir -p "$cache_dir"
+        if ! download_file "$download_url" "$cached_archive"; then
+            write_status "Download failed" "error"
+            rm -f "$cached_archive"
+            exit 1
+        fi
+    fi
+
+    # Create temp directory for extraction
     local temp_dir
     temp_dir=$(mktemp -d)
     trap "rm -rf '$temp_dir'" EXIT
-
-    local archive_path="${temp_dir}/sindarin-libs.tar.gz"
-
-    # Download the archive
-    download_file "$download_url" "$archive_path"
 
     write_status "Extracting to ${INSTALL_DIR}..."
 
@@ -149,10 +162,10 @@ install_sindarin_libs() {
     fi
     mkdir -p "$INSTALL_DIR"
 
-    # Extract the archive
+    # Extract the archive from cache
     local extract_dir="${temp_dir}/extracted"
     mkdir -p "$extract_dir"
-    tar -xzf "$archive_path" -C "$extract_dir"
+    tar -xzf "$cached_archive" -C "$extract_dir"
 
     # Handle potentially nested directory structure
     local contents
