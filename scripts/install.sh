@@ -71,10 +71,19 @@ fetch_url() {
     local tool
     tool=$(get_download_tool)
 
+    # Use GITHUB_TOKEN for authentication if available (avoids rate limiting)
     if [ "$tool" = "curl" ]; then
-        curl -fsSL "$url"
+        if [ -n "$GITHUB_TOKEN" ]; then
+            curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" "$url"
+        else
+            curl -fsSL "$url"
+        fi
     else
-        wget -qO- "$url"
+        if [ -n "$GITHUB_TOKEN" ]; then
+            wget -qO- --header="Authorization: Bearer $GITHUB_TOKEN" "$url"
+        else
+            wget -qO- "$url"
+        fi
     fi
 }
 
