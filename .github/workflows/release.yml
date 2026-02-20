@@ -95,7 +95,7 @@ jobs:
       matrix:
         include:
           - arch: x64
-            runner: macos-13
+            runner: macos-15
             triplet: x64-osx
             preset: ci-darwin
           - arch: arm64

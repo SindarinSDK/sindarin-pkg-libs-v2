@@ -106,7 +106,8 @@
       "inherits": "base",
       "displayName": "CI Darwin",
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-osx"
+        "VCPKG_TARGET_TRIPLET": "x64-osx",
+        "CMAKE_OSX_ARCHITECTURES": "x86_64"
       }
     },
     {
