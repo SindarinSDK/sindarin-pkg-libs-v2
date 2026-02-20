@@ -72,11 +72,33 @@
       }
     },
     {
+      "name": "linux-arm64",
+      "inherits": "base",
+      "displayName": "Linux ARM64",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "arm64-linux",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "ci-linux",
       "inherits": "base",
       "displayName": "CI Linux",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-linux"
+      }
+    },
+    {
+      "name": "ci-linux-arm64",
+      "inherits": "base",
+      "displayName": "CI Linux ARM64",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "arm64-linux"
       }
     },
     {
@@ -122,8 +144,16 @@
       "configurePreset": "windows"
     },
     {
+      "name": "linux-arm64",
+      "configurePreset": "linux-arm64"
+    },
+    {
       "name": "ci-linux",
       "configurePreset": "ci-linux"
+    },
+    {
+      "name": "ci-linux-arm64",
+      "configurePreset": "ci-linux-arm64"
     },
     {
       "name": "ci-darwin",

@@ -55,6 +55,24 @@ detect_os() {
     esac
 }
 
+detect_arch() {
+    local arch
+    arch="$(uname -m)"
+
+    case "$arch" in
+        x86_64|amd64)
+            echo "x64"
+            ;;
+        aarch64|arm64)
+            echo "arm64"
+            ;;
+        *)
+            write_status "Unsupported architecture: $arch" "error"
+            exit 1
+            ;;
+    esac
+}
+
 get_download_tool() {
     if command -v curl &> /dev/null; then
         echo "curl"
@@ -118,8 +136,9 @@ get_latest_release() {
     local version
     version=$(echo "$release_info" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
 
-    # Find the appropriate asset URL based on OS
-    local asset_pattern="${os}.tar.gz"
+    # Find the appropriate asset URL based on OS and arch
+    local arch="$2"
+    local asset_pattern="${os}-${arch}.tar.gz"
     local download_url
     download_url=$(echo "$release_info" | grep '"browser_download_url"' | grep "$asset_pattern" | head -1 | sed 's/.*"browser_download_url": *"\([^"]*\)".*/\1/')
 
@@ -202,13 +221,15 @@ main() {
 
     local os
     os=$(detect_os)
-    write_status "Detected OS: ${os}"
+    local arch
+    arch=$(detect_arch)
+    write_status "Detected OS: ${os} (${arch})"
 
     # Set install directory based on OS
     INSTALL_DIR="${BASE_DIR}/${os}"
 
     local release_info
-    release_info=$(get_latest_release "$os")
+    release_info=$(get_latest_release "$os" "$arch")
 
     install_sindarin_libs "$os" "$release_info"
 

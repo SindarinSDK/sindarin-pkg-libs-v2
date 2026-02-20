@@ -17,8 +17,19 @@ env:
 
 jobs:
   build-linux:
-    name: Build Linux Libraries
-    runs-on: ubuntu-latest
+    name: Build Linux Libraries (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            runner: ubuntu-latest
+            triplet: x64-linux
+            preset: ci-linux
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            triplet: arm64-linux
+            preset: ci-linux-arm64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,9 +47,9 @@ jobs:
             vcpkg
             vcpkg_installed
             vcpkg_cache
-          key: vcpkg-linux-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-linux-${{ matrix.arch }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            vcpkg-linux-
+            vcpkg-linux-${{ matrix.arch }}-
 
       - name: Setup vcpkg
         run: |
@@ -49,16 +60,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ./vcpkg/vcpkg install --triplet=x64-linux \
+          ./vcpkg/vcpkg install --triplet=${{ matrix.triplet }} \
             --x-manifest-root=. \
             --x-install-root=./vcpkg_installed
 
       - name: Build libraries
         run: |
-          cmake --preset ci-linux \
-            -DVCPKG_TARGET_TRIPLET=x64-linux \
+          cmake --preset ${{ matrix.preset }} \
+            -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} \
             -DVCPKG_INSTALLED_DIR=${{ github.workspace }}/vcpkg_installed
-          cmake --build --preset ci-linux
+          cmake --build --preset ${{ matrix.preset }}
 
       - name: Verify output
         run: |
@@ -73,13 +84,24 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: libs-linux
+          name: libs-linux-${{ matrix.arch }}
           path: libs/linux/
           retention-days: 7
 
   build-darwin:
-    name: Build Darwin Libraries
-    runs-on: macos-latest
+    name: Build Darwin Libraries (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            runner: macos-13
+            triplet: x64-osx
+            preset: ci-darwin
+          - arch: arm64
+            runner: macos-latest
+            triplet: arm64-osx
+            preset: ci-darwin-arm64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -95,20 +117,9 @@ jobs:
             vcpkg
             vcpkg_installed
             vcpkg_cache
-          key: vcpkg-darwin-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-darwin-${{ matrix.arch }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            vcpkg-darwin-
-
-      - name: Determine triplet
-        id: triplet
-        run: |
-          if [ "$(uname -m)" = "arm64" ]; then
-            echo "triplet=arm64-osx" >> $GITHUB_OUTPUT
-            echo "preset=ci-darwin-arm64" >> $GITHUB_OUTPUT
-          else
-            echo "triplet=x64-osx" >> $GITHUB_OUTPUT
-            echo "preset=ci-darwin" >> $GITHUB_OUTPUT
-          fi
+            vcpkg-darwin-${{ matrix.arch }}-
 
       - name: Setup vcpkg
         run: |
@@ -119,16 +130,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ./vcpkg/vcpkg install --triplet=${{ steps.triplet.outputs.triplet }} \
+          ./vcpkg/vcpkg install --triplet=${{ matrix.triplet }} \
             --x-manifest-root=. \
             --x-install-root=./vcpkg_installed
 
       - name: Build libraries
         run: |
-          cmake --preset ${{ steps.triplet.outputs.preset }} \
-            -DVCPKG_TARGET_TRIPLET=${{ steps.triplet.outputs.triplet }} \
+          cmake --preset ${{ matrix.preset }} \
+            -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} \
             -DVCPKG_INSTALLED_DIR=${{ github.workspace }}/vcpkg_installed
-          cmake --build --preset ${{ steps.triplet.outputs.preset }}
+          cmake --build --preset ${{ matrix.preset }}
 
       - name: Verify output
         run: |
@@ -143,7 +154,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: libs-darwin
+          name: libs-darwin-${{ matrix.arch }}
           path: libs/darwin/
           retention-days: 7
 
@@ -246,17 +257,29 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download Linux artifacts
+      - name: Download Linux x64 artifacts
         uses: actions/download-artifact@v4
         with:
-          name: libs-linux
-          path: libs-linux/
+          name: libs-linux-x64
+          path: libs-linux-x64/
 
-      - name: Download Darwin artifacts
+      - name: Download Linux arm64 artifacts
         uses: actions/download-artifact@v4
         with:
-          name: libs-darwin
-          path: libs-darwin/
+          name: libs-linux-arm64
+          path: libs-linux-arm64/
+
+      - name: Download Darwin x64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: libs-darwin-x64
+          path: libs-darwin-x64/
+
+      - name: Download Darwin arm64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: libs-darwin-arm64
+          path: libs-darwin-arm64/
 
       - name: Download Windows artifacts
         uses: actions/download-artifact@v4
@@ -266,25 +289,19 @@ jobs:
 
       - name: Display structure
         run: |
-          echo "=== Linux ==="
-          find libs-linux -name "*.a" | wc -l
-          echo ""
-          echo "=== Darwin ==="
-          find libs-darwin -name "*.a" | wc -l
-          echo ""
-          echo "=== Windows ==="
-          find libs-windows -name "*.a" | wc -l
+          for dir in libs-linux-x64 libs-linux-arm64 libs-darwin-x64 libs-darwin-arm64 libs-windows; do
+            echo "=== $dir ==="
+            find "$dir" -name "*.a" | wc -l
+            echo ""
+          done
 
       - name: Create archives
         run: |
-          # Create tar.gz for Linux
-          tar -czvf "sindarin-libs-${{ env.VERSION }}-linux.tar.gz" -C libs-linux .
-
-          # Create tar.gz for Darwin
-          tar -czvf "sindarin-libs-${{ env.VERSION }}-darwin.tar.gz" -C libs-darwin .
-
-          # Create zip for Windows
-          cd libs-windows && zip -r "../sindarin-libs-${{ env.VERSION }}-windows.zip" . && cd ..
+          tar -czvf "sindarin-libs-${{ env.VERSION }}-linux-x64.tar.gz" -C libs-linux-x64 .
+          tar -czvf "sindarin-libs-${{ env.VERSION }}-linux-arm64.tar.gz" -C libs-linux-arm64 .
+          tar -czvf "sindarin-libs-${{ env.VERSION }}-darwin-x64.tar.gz" -C libs-darwin-x64 .
+          tar -czvf "sindarin-libs-${{ env.VERSION }}-darwin-arm64.tar.gz" -C libs-darwin-arm64 .
+          cd libs-windows && zip -r "../sindarin-libs-${{ env.VERSION }}-windows-x64.zip" . && cd ..
 
           echo "Created archives:"
           ls -la *.tar.gz *.zip

@@ -21,8 +21,14 @@ else
         endif
     else
         PLATFORM := linux
-        CMAKE_PRESET := ci-linux
-        TRIPLET := x64-linux
+        UNAME_M := $(shell uname -m)
+        ifeq ($(UNAME_M),aarch64)
+            CMAKE_PRESET := ci-linux-arm64
+            TRIPLET := arm64-linux
+        else
+            CMAKE_PRESET := ci-linux
+            TRIPLET := x64-linux
+        endif
     endif
     PYTHON := python3
 endif

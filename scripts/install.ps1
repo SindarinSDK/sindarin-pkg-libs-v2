@@ -31,7 +31,7 @@ function Get-LatestWindowsRelease {
     try {
         $release = Invoke-RestMethod -Uri $apiUrl -Headers @{ "User-Agent" = "sindarin-installer" }
 
-        $asset = $release.assets | Where-Object { $_.name -like "*windows*.zip" } | Select-Object -First 1
+        $asset = $release.assets | Where-Object { $_.name -like "*windows-x64*.zip" } | Select-Object -First 1
 
         if (-not $asset) {
             throw "No Windows release asset found"
