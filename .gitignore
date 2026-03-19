@@ -28,5 +28,5 @@ __pycache__/
 .env
 venv/
 
-# Note: libs/ directory is NOT ignored - it contains the built artifacts
-# that are tracked by Git LFS
+# Local built artifacts - ignored (not tracked)
+libs/
