@@ -34,6 +34,22 @@
       "default-features": false,
       "features": ["ssl"]
     },
+    "sqlite3",
+    {
+      "name": "libpq",
+      "default-features": false,
+      "features": ["openssl"]
+    },
+    {
+      "name": "libmariadb",
+      "default-features": false,
+      "features": ["openssl"]
+    },
+    {
+      "name": "freetds",
+      "default-features": false,
+      "features": ["openssl"]
+    },
     "sindarin-template"
   ]
 }
