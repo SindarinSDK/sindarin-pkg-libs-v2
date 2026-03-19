@@ -46,9 +46,9 @@
       "features": ["openssl"]
     },
     {
-      "name": "freetds",
+      "name": "mongo-c-driver",
       "default-features": false,
-      "features": ["openssl"]
+      "features": ["openssl", "zstd"]
     },
     "sindarin-template"
   ]
