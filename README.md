@@ -28,13 +28,18 @@ These commands download and extract the latest libraries to `./libs/{platform}` 
 |---------|-------------|
 | zlib | Compression library |
 | yyjson | High-performance JSON parser |
+| json-c | JSON parsing and serialization (C) |
 | libxml2 | XML parsing library |
 | libyaml | YAML parsing library |
 | OpenSSL | SSL/TLS cryptography |
 | ngtcp2 | QUIC protocol implementation |
 | libssh | SSH library |
+| libssh2 | SSH2 protocol library |
 | libgit2 | Git implementation |
 | curl | HTTP client library |
+| http-parser | HTTP message parser |
+| pcre2 | Perl-compatible regular expressions |
+| sindarin-template | Sindarin template library |
 
 ## Extracted Directory Structure
 
@@ -142,10 +147,15 @@ Alternatively, trigger manually via the Actions UI with a tag name.
 The build system is provided as-is. Individual libraries retain their original licenses:
 - zlib: zlib license
 - yyjson: MIT
+- json-c: MIT
 - libxml2: MIT
 - libyaml: MIT
 - OpenSSL: Apache 2.0
 - ngtcp2: MIT
 - libssh: LGPL 2.1
+- libssh2: BSD 3-Clause
 - libgit2: GPL 2.0 with linking exception
 - curl: MIT/X derivate
+- http-parser: MIT
+- pcre2: BSD 3-Clause
+- sindarin-template: MIT
