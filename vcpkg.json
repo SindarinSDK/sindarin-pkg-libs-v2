@@ -16,10 +16,6 @@
     "libyaml",
     "openssl",
     {
-      "name": "ngtcp2",
-      "features": ["openssl"]
-    },
-    {
       "name": "libssh",
       "default-features": false,
       "features": ["server"]
