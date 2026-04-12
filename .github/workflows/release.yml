@@ -197,7 +197,9 @@ jobs:
       - name: Install build tools
         run: |
           choco install ninja winflexbison3 -y
-          Copy-Item "C:\ProgramData\chocolatey\bin\win_bison.exe" "C:\ProgramData\chocolatey\bin\bison.exe"
+          $chocobin = "C:\ProgramData\chocolatey\bin"
+          Copy-Item "$chocobin\win_bison.exe" "$chocobin\bison.exe"
+          Copy-Item "$chocobin\win_flex.exe" "$chocobin\flex.exe"
         shell: pwsh
 
       - name: Cache vcpkg
