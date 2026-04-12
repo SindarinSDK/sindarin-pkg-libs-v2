@@ -144,18 +144,19 @@ Alternatively, trigger manually via the Actions UI with a tag name.
 
 ## License
 
-The build system is provided as-is. Individual libraries retain their original licenses:
-- zlib: zlib license
-- yyjson: MIT
-- json-c: MIT
-- libxml2: MIT
-- libyaml: MIT
-- OpenSSL: Apache 2.0
-- ngtcp2: MIT
-- libssh: LGPL 2.1
-- libssh2: BSD 3-Clause
-- libgit2: GPL 2.0 with linking exception
-- curl: MIT/X derivate
-- http-parser: MIT
-- pcre2: BSD 3-Clause
-- sindarin-template: MIT
+This package's build system is licensed under the [MIT License](LICENSE).
+
+Individual bundled libraries retain their original licenses. See [THIRD-PARTY.md](THIRD-PARTY.md) for the complete attribution document including license types, copyright holders, and compliance notes.
+
+Summary of bundled library licenses:
+
+| License | Libraries |
+|---------|-----------|
+| MIT | yyjson, json-c, libxml2, libyaml, curl, http-parser, ngtcp2, utf8proc, sindarin-template |
+| Apache 2.0 | OpenSSL, libmongoc, libbson |
+| BSD 3-Clause | libssh2, pcre2, zstd (dual-licensed, BSD selected) |
+| zlib License | zlib |
+| PostgreSQL License | libpq, libpgcommon, libpgport, libpgtypes, libecpg |
+| Public Domain | SQLite |
+| LGPL 2.1 | libssh, libmariadb |
+| GPL 2.0 + Linking Exception | libgit2 |
