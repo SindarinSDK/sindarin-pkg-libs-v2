@@ -44,7 +44,7 @@ LIBS_DIR := libs/$(PLATFORM)
 VCPKG_DIR := vcpkg
 VCPKG_INSTALLED := vcpkg_installed/$(TRIPLET)
 
-.PHONY: all setup build clean rebuild info help
+.PHONY: all setup build release-build clean rebuild info help
 
 # Default target
 all: build
@@ -95,6 +95,41 @@ build: $(VCPKG_INSTALLED)
 $(VCPKG_INSTALLED):
 	@echo "Dependencies not found. Running setup..."
 	$(MAKE) setup
+
+#------------------------------------------------------------------------------
+# Release build (called by sindarin-pipelines/sindarin-lib-release.yml)
+# Env: VCPKG_ROOT, TRIPLET, PLATFORM, ARCH, VERSION
+#------------------------------------------------------------------------------
+
+# Derive cmake preset from PLATFORM + ARCH
+ifeq ($(PLATFORM),windows)
+    RELEASE_PRESET := ci-windows
+else ifeq ($(PLATFORM),darwin)
+    ifeq ($(ARCH),arm64)
+        RELEASE_PRESET := ci-darwin-arm64
+    else
+        RELEASE_PRESET := ci-darwin
+    endif
+else
+    ifeq ($(ARCH),arm64)
+        RELEASE_PRESET := ci-linux-arm64
+    else
+        RELEASE_PRESET := ci-linux
+    endif
+endif
+
+release-build:
+ifeq ($(OS),Windows_NT)
+	cp "C:/ProgramData/chocolatey/bin/win_bison.exe" "C:/ProgramData/chocolatey/bin/bison.exe" || true
+	cp "C:/ProgramData/chocolatey/bin/win_flex.exe" "C:/ProgramData/chocolatey/bin/flex.exe" || true
+endif
+	"$(VCPKG_ROOT)/vcpkg" install --triplet=$(TRIPLET) \
+		--x-manifest-root=. \
+		--x-install-root=./vcpkg_installed
+	cmake --preset $(RELEASE_PRESET) \
+		-DVCPKG_TARGET_TRIPLET=$(TRIPLET) \
+		-DVCPKG_INSTALLED_DIR=$(CURDIR)/vcpkg_installed
+	cmake --build --preset $(RELEASE_PRESET)
 
 # Clean build artifacts
 clean:
