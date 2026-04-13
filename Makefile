@@ -97,23 +97,13 @@ $(VCPKG_INSTALLED):
 	$(MAKE) setup
 
 #------------------------------------------------------------------------------
-# vcpkg bootstrap (for release-build when VCPKG_ROOT not already present)
+# Release build (called by sindarin-pipelines/sindarin-lib-release.yml)
+# Env (from CI): VCPKG_ROOT, TRIPLET, PLATFORM, ARCH, VERSION
+# Defaults (for local builds): auto-detected from platform
 #------------------------------------------------------------------------------
 VCPKG_ROOT ?= $(CURDIR)/vcpkg
 ARCH       ?= $(if $(filter aarch64,$(UNAME_M)),arm64,x64)
 VERSION    ?= local
-
-$(VCPKG_ROOT)/vcpkg $(VCPKG_ROOT)/vcpkg.exe:
-	git clone --depth=1 https://github.com/microsoft/vcpkg.git "$(VCPKG_ROOT)"
-ifeq ($(OS),Windows_NT)
-	"$(VCPKG_ROOT)/bootstrap-vcpkg.bat" -disableMetrics
-else
-	"$(VCPKG_ROOT)/bootstrap-vcpkg.sh" -disableMetrics
-endif
-
-#------------------------------------------------------------------------------
-# Release build (called by sindarin-pipelines/sindarin-lib-release.yml)
-#------------------------------------------------------------------------------
 
 # Derive cmake preset from PLATFORM + ARCH
 ifeq ($(PLATFORM),windows)
@@ -132,7 +122,12 @@ else
     endif
 endif
 
-release-build: $(VCPKG_ROOT)/vcpkg
+release-build:
+	@if [ ! -x "$(VCPKG_ROOT)/vcpkg" ] && [ ! -x "$(VCPKG_ROOT)/vcpkg.exe" ]; then \
+	    echo "Bootstrapping vcpkg into $(VCPKG_ROOT)..." && \
+	    git clone --depth=1 https://github.com/microsoft/vcpkg.git "$(VCPKG_ROOT)" && \
+	    "$(VCPKG_ROOT)/bootstrap-vcpkg.sh" -disableMetrics; \
+	fi
 ifeq ($(OS),Windows_NT)
 	cp "C:/ProgramData/chocolatey/bin/win_bison.exe" "C:/ProgramData/chocolatey/bin/bison.exe" || true
 	cp "C:/ProgramData/chocolatey/bin/win_flex.exe" "C:/ProgramData/chocolatey/bin/flex.exe" || true
