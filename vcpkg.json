@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "sindarin-libs",
   "version": "1.0.0",
-  "description": "Pre-built static libraries for Sindarin projects",
+  "description": "Core static libraries for Sindarin SDK",
   "supports": "!uwp",
   "dependencies": [
     "zlib",
@@ -24,27 +24,6 @@
       "name": "libgit2",
       "default-features": false,
       "features": ["ssh", "openssl", "pcre2"]
-    },
-    {
-      "name": "curl",
-      "default-features": false,
-      "features": ["ssl"]
-    },
-    "sqlite3",
-    {
-      "name": "libpq",
-      "default-features": false,
-      "features": ["openssl"]
-    },
-    {
-      "name": "libmariadb",
-      "default-features": false,
-      "features": ["openssl"]
-    },
-    {
-      "name": "mongo-c-driver",
-      "default-features": false,
-      "features": ["openssl", "zstd"]
     },
     "sindarin-template"
   ]
