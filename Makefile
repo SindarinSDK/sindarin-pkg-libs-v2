@@ -44,7 +44,7 @@ LIBS_DIR := libs/$(PLATFORM)
 VCPKG_DIR := vcpkg
 VCPKG_INSTALLED := vcpkg_installed/$(TRIPLET)
 
-.PHONY: all setup build release-build clean rebuild info help
+.PHONY: all setup build clean rebuild info help
 
 # Default target
 all: build
@@ -122,7 +122,7 @@ else
     endif
 endif
 
-release-build:
+build:
 	@if [ ! -x "$(VCPKG_ROOT)/vcpkg" ] && [ ! -x "$(VCPKG_ROOT)/vcpkg.exe" ]; then \
 	    echo "Bootstrapping vcpkg into $(VCPKG_ROOT)..." && \
 	    git clone --depth=1 https://github.com/microsoft/vcpkg.git "$(VCPKG_ROOT)" && \
