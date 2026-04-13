@@ -5,7 +5,7 @@
 ifeq ($(OS),Windows_NT)
     PLATFORM := windows
     CMAKE_PRESET := ci-windows
-    TRIPLET := x64-mingw-static
+    TRIPLET ?= x64-mingw-static
     PYTHON := python
 else
     UNAME_S := $(shell uname -s)
@@ -14,20 +14,20 @@ else
         UNAME_M := $(shell uname -m)
         ifeq ($(UNAME_M),arm64)
             CMAKE_PRESET := ci-darwin-arm64
-            TRIPLET := arm64-osx
+            TRIPLET ?= arm64-osx
         else
             CMAKE_PRESET := ci-darwin
-            TRIPLET := x64-osx
+            TRIPLET ?= x64-osx
         endif
     else
         PLATFORM := linux
         UNAME_M := $(shell uname -m)
         ifeq ($(UNAME_M),aarch64)
             CMAKE_PRESET := ci-linux-arm64
-            TRIPLET := arm64-linux
+            TRIPLET ?= arm64-linux
         else
             CMAKE_PRESET := ci-linux
-            TRIPLET := x64-linux
+            TRIPLET ?= x64-linux
         endif
     endif
     PYTHON := python3
