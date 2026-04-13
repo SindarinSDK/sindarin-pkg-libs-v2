@@ -1,10 +1,12 @@
 #!/bin/bash
-# Sindarin Package Libraries Installer for Linux/macOS
-# Downloads and extracts the latest sindarin-pkg-libs to ./libs/{os}
+# Sindarin native library installer for Linux/macOS
+# Downloads the latest release from GitHub to ./libs/{os}
+# Caches archives in ~/.sn-cache/downloads/ to avoid re-downloading
 
 set -e
 
 REPO="SindarinSDK/sindarin-pkg-libs"
+PKG_NAME="sindarin-libs"
 BASE_DIR="$(pwd)/libs"
 
 # Colors for output
@@ -150,14 +152,13 @@ get_latest_release() {
     echo "$version|$download_url"
 }
 
-install_sindarin_libs() {
+install_libs() {
     local os="$1"
     local release_info="$2"
 
     local version="${release_info%%|*}"
     local download_url="${release_info#*|}"
 
-    # Derive filename from download URL
     local archive_name
     archive_name=$(basename "$download_url")
 
@@ -168,7 +169,7 @@ install_sindarin_libs() {
     if [ -f "$cached_archive" ]; then
         write_status "Using cached ${archive_name}"
     else
-        write_status "Downloading sindarin-libs ${version} for ${os}..."
+        write_status "Downloading ${PKG_NAME} ${version} for ${os}..."
         mkdir -p "$cache_dir"
         if ! download_file "$download_url" "$cached_archive"; then
             write_status "Download failed" "error"
@@ -177,20 +178,17 @@ install_sindarin_libs() {
         fi
     fi
 
-    # Create temp directory for extraction
     local temp_dir
     temp_dir=$(mktemp -d)
     trap "rm -rf '$temp_dir'" EXIT
 
     write_status "Extracting to ${INSTALL_DIR}..."
 
-    # Create or clean install directory
     if [ -d "$INSTALL_DIR" ]; then
         rm -rf "$INSTALL_DIR"
     fi
     mkdir -p "$INSTALL_DIR"
 
-    # Extract the archive from cache
     local extract_dir="${temp_dir}/extracted"
     mkdir -p "$extract_dir"
     tar -xzf "$cached_archive" -C "$extract_dir"
@@ -202,22 +200,20 @@ install_sindarin_libs() {
     count=$(echo "$contents" | wc -l)
 
     if [ "$count" -eq 1 ] && [ -d "${extract_dir}/${contents}" ]; then
-        # Single directory inside - move its contents
         mv "${extract_dir}/${contents}"/* "$INSTALL_DIR/" 2>/dev/null || true
         mv "${extract_dir}/${contents}"/.[!.]* "$INSTALL_DIR/" 2>/dev/null || true
     else
-        # Multiple items - move them all
         mv "${extract_dir}"/* "$INSTALL_DIR/" 2>/dev/null || true
         mv "${extract_dir}"/.[!.]* "$INSTALL_DIR/" 2>/dev/null || true
     fi
 
-    write_status "Successfully installed sindarin-libs ${version} to ${INSTALL_DIR}" "success"
+    write_status "Successfully installed ${PKG_NAME} ${version} to ${INSTALL_DIR}" "success"
 }
 
 # Main execution
 main() {
-    write_status "Sindarin Package Libraries Installer"
-    write_status "====================================="
+    write_status "${PKG_NAME} — native library installer"
+    write_status "========================================"
 
     local os
     os=$(detect_os)
@@ -231,7 +227,7 @@ main() {
     local release_info
     release_info=$(get_latest_release "$os" "$arch")
 
-    install_sindarin_libs "$os" "$release_info"
+    install_libs "$os" "$release_info"
 
     echo ""
     write_status "Installation complete!" "success"
