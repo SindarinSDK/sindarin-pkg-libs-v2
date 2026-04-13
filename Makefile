@@ -132,7 +132,7 @@ ifeq ($(OS),Windows_NT)
 	cp "C:/ProgramData/chocolatey/bin/win_bison.exe" "C:/ProgramData/chocolatey/bin/bison.exe" || true
 	cp "C:/ProgramData/chocolatey/bin/win_flex.exe" "C:/ProgramData/chocolatey/bin/flex.exe" || true
 endif
-	VCPKG_MAX_CONCURRENCY=1 "$(VCPKG_ROOT)/vcpkg" install --triplet=$(TRIPLET) \
+	MAKEFLAGS="-j1" VCPKG_MAX_CONCURRENCY=1 "$(VCPKG_ROOT)/vcpkg" install --triplet=$(TRIPLET) \
 		--x-manifest-root=. \
 		--x-install-root=./vcpkg_installed
 	cmake --preset $(RELEASE_PRESET) \
