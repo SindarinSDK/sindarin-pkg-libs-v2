@@ -6,7 +6,13 @@
   "supports": "!uwp",
   "dependencies": [
     "zlib",
+    "yyjson",
     "json-c",
+    {
+      "name": "curl",
+      "default-features": false,
+      "features": ["ssl"]
+    },
     {
       "name": "libxml2",
       "default-features": false,
