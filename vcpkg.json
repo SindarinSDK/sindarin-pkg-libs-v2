@@ -6,7 +6,6 @@
   "supports": "!uwp",
   "dependencies": [
     "zlib",
-    "yyjson",
     "json-c",
     {
       "name": "libxml2",
